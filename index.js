@@ -10,12 +10,14 @@ module.exports = class Stats extends EventEmitter {
     super()
     this[_archive] = archive
     this[_stats] = {
-      filesProgress: 0
+      filesProgress: 0,
+      filesTotal: 0
     }
     archive.list({ live: false }).on('data', entry => this.onentry(entry))
   }
   onentry (entry) {
     this[_stats].filesProgress++
+    this[_stats].filesTotal++
     this.update()
   }
   update () {
