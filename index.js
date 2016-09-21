@@ -13,15 +13,9 @@ module.exports = class Stats extends EventEmitter {
       filesProgress: 0
     }
     archive.list({ live: false }).on('data', entry => this.onentry(entry))
-    archive.on('download', entry => this.ondownload(entry))
   }
   onentry (entry) {
     this[_stats].filesProgress++
-    this.update()
-  }
-  ondownload (entry) {
-    console.log('onDownload', entry)
-    if (this[_archive].isEntryDownloaded(entry)) this[_stats].filesProgress++
     this.update()
   }
   update () {
