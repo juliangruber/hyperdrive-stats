@@ -12,11 +12,13 @@ module.exports = class Stats extends EventEmitter {
     this[_stats] = {
       filesProgress: 0,
       filesTotal: 0,
+      bytesProgress: 0,
       bytesTotal: 0
     }
     archive.list({ live: false }).on('data', entry => this.onentry(entry))
     if (archive.closed) archive.open(() => this.onopen())
     else setImmediate(() => this.onopen())
+    archive.on('download', buf => this.ondownload(buf))
   }
   onentry (entry) {
     this.update({
@@ -27,6 +29,11 @@ module.exports = class Stats extends EventEmitter {
   onopen () {
     this.update({
       bytesTotal: this[_archive].content.bytes
+    })
+  }
+  ondownload (buf) {
+    this.update({
+      bytesProgress: this[_stats].bytesProgress += buf.length
     })
   }
   update (data) {
