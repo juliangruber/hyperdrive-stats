@@ -9,6 +9,6 @@
     "tap": "^7.1.2"
   },
   "scripts": {
-    "test": "tap test.js && standard"
+    "test": "standard"
   }
 }
