@@ -13,7 +13,8 @@ module.exports = class Stats extends EventEmitter {
       filesProgress: 0,
       filesTotal: 0,
       bytesProgress: 0,
-      bytesTotal: 0
+      bytesTotal: 0,
+      blocksProgress: 0
     }
     archive.list({ live: false }).on('data', entry => this.onentry(entry))
     if (archive.closed) archive.open(() => this.onopen())
@@ -23,7 +24,10 @@ module.exports = class Stats extends EventEmitter {
   onentry (entry) {
     this.update({
       filesProgress: this[_stats].filesProgress + 1,
-      filesTotal: this[_stats].filesTotal + 1
+      filesTotal: this[_stats].filesTotal + 1,
+      blocksProgress:
+        this[_stats].blocksProgress +
+        this[_archive].countDownloadedBlocks(entry)
     })
   }
   onopen () {
@@ -33,7 +37,8 @@ module.exports = class Stats extends EventEmitter {
   }
   ondownload (buf) {
     this.update({
-      bytesProgress: this[_stats].bytesProgress += buf.length
+      bytesProgress: this[_stats].bytesProgress += buf.length,
+      blocksProgress: this[_stats].blocksProgress + 1
     })
   }
   update (data) {
