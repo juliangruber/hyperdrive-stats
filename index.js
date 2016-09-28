@@ -17,44 +17,56 @@ module.exports = class Stats extends EventEmitter {
       blocksProgress: 0,
       blocksTotal: 0
     }
-    archive.list({ live: false }).on('data', entry => this.onentry(entry))
-    if (archive.closed) archive.open(() => this.onopen())
-    else setImmediate(() => this.onopen())
-    archive.on('download', buf => this.ondownload(buf))
+    const list = archive.list({ live: false })
+    this.filesProgress(list)
+    this.filesTotal(list)
+    this.bytesProgress()
+    this.bytesTotal()
+    this.blocksProgress(list)
+    this.blocksTotal()
   }
-  onentry (entry) {
-    this.update({
-      filesProgress: this[_stats].filesProgress + 1,
-      filesTotal: this[_stats].filesTotal + 1,
-      blocksProgress:
-        this[_stats].blocksProgress +
-        this[_archive].countDownloadedBlocks(entry)
+  filesProgress (list) {
+    list.on('data', entry => {
+      this.update({ filesProgress: this[_stats].filesProgress + 1 })
     })
   }
-  onopen () {
-    this.onmeta()
-    this[_archive].metadata.on('update', () => this.onmeta())
-  }
-  onmeta () {
-    this.countBytes()
-    this.countBlocks()
-  }
-  ondownload (buf) {
-    this.countBytes()
-    this.update({
-      bytesProgress: this[_stats].bytesProgress += buf.length,
-      blocksProgress: this[_stats].blocksProgress + 1
+  filesTotal (list) {
+    list.on('data', () => {
+      this.update({ filesTotal: this[_stats].filesTotal + 1 })
     })
   }
-  countBytes () {
-    this.update({
+  bytesProgress () {
+    this[_archive].on('download', buf => {
+      this.update({ bytesProgress: this[_stats].bytesProgress += buf.length })
+    })
+  }
+  bytesTotal () {
+    const update = () => this.update({
       bytesTotal: this[_archive].content.bytes
     })
+    this[_archive].on('download', update)
+    this[_archive].metadata.on('update', update)
   }
-  countBlocks () {
-    this.update({
+  blocksProgress (list) {
+    list.on('data', entry => {
+      this.update({
+        blocksProgress:
+          this[_stats].blocksProgress +
+          this[_archive].countDownloadedBlocks(entry)
+      })
+    })
+    this[_archive].on('download', () => {
+      this.update({
+        blocksProgress: this[_stats].blocksProgress + 1
+      })
+    })
+  }
+  blocksTotal () {
+    const update = () => this.update({
       blocksTotal: this[_archive].content.blocks
     })
+    if (archive.closed) archive.open(update)
+    else setImmediate(update)
   }
   update (data) {
     for (let key of Object.keys(data)) {
