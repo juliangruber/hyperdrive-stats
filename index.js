@@ -31,14 +31,19 @@ module.exports = class Stats extends EventEmitter {
     })
   }
   onopen () {
-    this.update({
-      bytesTotal: this[_archive].content.bytes
-    })
+    this.countBytes()
+    this[_archive].metadata.on('update', () => this.countBytes())
   }
   ondownload (buf) {
+    this.countBytes()
     this.update({
       bytesProgress: this[_stats].bytesProgress += buf.length,
       blocksProgress: this[_stats].blocksProgress + 1
+    })
+  }
+  countBytes () {
+    this.update({
+      bytesTotal: this[_archive].content.bytes
     })
   }
   update (data) {
