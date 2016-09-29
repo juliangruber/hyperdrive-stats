@@ -12,6 +12,7 @@
     "test": "standard"
   },
   "dependencies": {
-    "hypercore-index": "^5.0.0"
+    "hypercore-index": "^5.0.0",
+    "hyperdrive-encoding": "^1.0.1"
   }
 }

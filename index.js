@@ -2,7 +2,7 @@
 
 const EventEmitter = require('events')
 const index = require('hypercore-index')
-const messages = require('hyperdrive/messages')
+const encoding = require('hyperdrive-encoding')
 
 const _archive = Symbol()
 const _stats = Symbol()
@@ -29,7 +29,7 @@ module.exports = class Stats extends EventEmitter {
         feed: opts.archive.metadata,
         db: db
       }, (buf, cb) => {
-        const entry = decodeEntry(buf)
+        const entry = encoding.decodeEntry(buf)
         if (entry.type === 'file' || entry.type === 'directory') {
           db.get(entry.name, (err, last) => {
             if (err && !err.notFound) return cb(err)
@@ -78,24 +78,4 @@ module.exports = class Stats extends EventEmitter {
     }
     this.emit('update', Object.assign({}, this[_stats]))
   }
-}
-
-const decodeEntry = buf => {
-  var type = buf[0]
-  if (type > 4) throw new Error('Unknown message type: ' + type)
-  var entry = messages.Entry.decode(buf, 1)
-  entry.type = toTypeString(type)
-  return entry
-}
-
-const toTypeString = t => {
-  switch (t) {
-    case 0: return 'index'
-    case 1: return 'file'
-    case 2: return 'directory'
-    case 3: return 'symlink'
-    case 4: return 'hardlink'
-  }
-
-  return 'unknown'
 }
