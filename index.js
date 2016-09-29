@@ -1,72 +1,75 @@
 'use strict'
 
 const EventEmitter = require('events')
+const index = require('hypercore-index')
+const messages = require('hyperdrive/messages')
 
 const _archive = Symbol()
 const _stats = Symbol()
 
 module.exports = class Stats extends EventEmitter {
-  constructor (archive) {
+  constructor (opts) {
     super()
-    this[_archive] = archive
-    this[_stats] = {
-      filesProgress: 0,
-      filesTotal: 0,
-      bytesProgress: 0,
-      bytesTotal: 0,
-      blocksProgress: 0,
-      blocksTotal: 0
-    }
-    const list = archive.list({ live: false })
-    this.filesProgress(list)
-    this.filesTotal(list)
-    this.bytesProgress()
-    this.bytesTotal()
-    this.blocksProgress(list)
-    this.blocksTotal()
-  }
-  filesProgress (list) {
-    list.on('data', entry => {
-      this.update({ filesProgress: this[_stats].filesProgress + 1 })
-    })
-  }
-  filesTotal (list) {
-    list.on('data', () => {
-      this.update({ filesTotal: this[_stats].filesTotal + 1 })
-    })
-  }
-  bytesProgress () {
-    this[_archive].on('download', buf => {
-      this.update({ bytesProgress: this[_stats].bytesProgress += buf.length })
-    })
-  }
-  bytesTotal () {
-    const update = () => this.update({
-      bytesTotal: this[_archive].content.bytes
-    })
-    this[_archive].on('download', update)
-    this[_archive].metadata.on('update', update)
-  }
-  blocksProgress (list) {
-    list.on('data', entry => {
-      this.update({
-        blocksProgress:
-          this[_stats].blocksProgress +
-          this[_archive].countDownloadedBlocks(entry)
+
+    const archive = opts.archive
+    const db = opts.db
+
+    db.get('stats', (err, stats) => {
+      if (err && !err.notFound) return this.emit('error', err)
+
+      this[_archive] = archive
+      this[_stats] = Object.assign({
+        bytesTotal: 0,
+        blocksTotal: 0,
+        filesTotal: 0,
+        directoriesTotal: 0
+      }, JSON.parse(stats || '{}'))
+
+      index({
+        feed: opts.archive.metadata,
+        db: db
+      }, (buf, cb) => {
+        const entry = decodeEntry(buf)
+        if (entry.type === 'file' || entry.type === 'directory') {
+          db.get(entry.name, (err, last) => {
+            if (err && !err.notFound) return cb(err)
+            const lastFound = !!last
+            last = JSON.parse(last || '{}')
+
+            if (entry.type === 'file') {
+              this.update({
+                bytesTotal: this[_stats].bytesTotal
+                  + entry.length
+                  - (last.length || 0),
+                blocksTotal: this[_stats].blocksTotal
+                  + entry.blocks
+                  - (last.blocks || 0)
+              })
+            }
+
+            if (!lastFound) {
+              if (entry.type === 'file') {
+                this.update({
+                  filesTotal: this[_stats].filesTotal + 1
+                })
+              } else {
+                this.update({
+                  directoriesTotal: this[_stats].directoriesTotal + 1
+                })
+              }
+            }
+            db.batch()
+              .put(entry.name, JSON.stringify(entry))
+              .put('stats', JSON.stringify(this[_stats]))
+              .write(cb)
+          })
+        } else {
+          cb()
+        }
+      }, err => {
+        this.emit('error', err)
       })
     })
-    this[_archive].on('download', () => {
-      this.update({
-        blocksProgress: this[_stats].blocksProgress + 1
-      })
-    })
-  }
-  blocksTotal () {
-    const update = () => this.update({
-      blocksTotal: this[_archive].content.blocks
-    })
-    if (archive.closed) archive.open(update)
-    else setImmediate(update)
   }
   update (data) {
     for (let key of Object.keys(data)) {
@@ -75,4 +78,24 @@ module.exports = class Stats extends EventEmitter {
     }
     this.emit('update', Object.assign({}, this[_stats]))
   }
+}
+
+const decodeEntry = buf => {
+  var type = buf[0]
+  if (type > 4) throw new Error('Unknown message type: ' + type)
+  var entry = messages.Entry.decode(buf, 1)
+  entry.type = toTypeString(type)
+  return entry
+}
+
+const toTypeString = t => {
+  switch (t) {
+    case 0: return 'index'
+    case 1: return 'file'
+    case 2: return 'directory'
+    case 3: return 'symlink'
+    case 4: return 'hardlink'
+  }
+
+  return 'unknown'
 }
