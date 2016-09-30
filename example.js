@@ -10,7 +10,7 @@ const drive = hyperdrive(db)
 const archive = drive.createArchive()
 
 const stats = new Stats({ archive, db })
-stats.on('update', console.log)
+stats.on('update', () => console.log(stats.get()))
 
 let ws = archive.createFileWriteStream('file')
 ws.on('finish', () => {

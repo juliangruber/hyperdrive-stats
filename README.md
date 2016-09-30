@@ -9,5 +9,5 @@
 const Stats = require('hyperdrive-stats')
 const stats = Stats(archive)
 
-stats.on('update', console.log)
+stats.on('update', () => console.log(stats.get()))
 ```

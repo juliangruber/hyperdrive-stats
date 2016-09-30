@@ -79,8 +79,11 @@ module.exports = class Stats extends EventEmitter {
   update (data) {
     for (let key of Object.keys(data)) {
       this[_stats][key] = data[key]
-      this.emit(`update:${key}`, data[key])
+      this.emit(`update:${key}`)
     }
-    this.emit('update', Object.assign({}, this[_stats]))
+    this.emit('update')
+  }
+  get () {
+    return Object.assign({}, this[_stats])
   }
 }
