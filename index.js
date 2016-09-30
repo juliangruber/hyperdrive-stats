@@ -36,12 +36,12 @@ module.exports = class Stats extends EventEmitter {
             last = JSON.parse(last || '{}')
 
             this.update({
-              bytesTotal: this[_stats].bytesTotal
-                + entry.length
-                - (last.length || 0),
-              blocksTotal: this[_stats].blocksTotal
-                + entry.blocks
-                - (last.blocks || 0)
+              bytesTotal: this[_stats].bytesTotal +
+                entry.length -
+                (last.length || 0),
+              blocksTotal: this[_stats].blocksTotal +
+                entry.blocks -
+                (last.blocks || 0)
             })
 
             if (!lastFound) {
