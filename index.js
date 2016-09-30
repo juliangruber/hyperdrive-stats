@@ -21,8 +21,7 @@ module.exports = class Stats extends EventEmitter {
       this[_stats] = Object.assign({
         bytesTotal: 0,
         blocksTotal: 0,
-        filesTotal: 0,
-        directoriesTotal: 0
+        filesTotal: 0
       }, JSON.parse(stats || '{}'))
 
       index({
@@ -30,33 +29,23 @@ module.exports = class Stats extends EventEmitter {
         db: db
       }, (buf, cb) => {
         const entry = encoding.decode(buf)
-        if (entry.type === 'file' || entry.type === 'directory') {
+        if (entry.type === 'file') {
           db.get(entry.name, (err, last) => {
             if (err && !err.notFound) return cb(err)
             const lastFound = !!last
             last = JSON.parse(last || '{}')
 
-            if (entry.type === 'file') {
-              this.update({
-                bytesTotal: this[_stats].bytesTotal
-                  + entry.length
-                  - (last.length || 0),
-                blocksTotal: this[_stats].blocksTotal
-                  + entry.blocks
-                  - (last.blocks || 0)
-              })
-            }
+            this.update({
+              bytesTotal: this[_stats].bytesTotal
+                + entry.length
+                - (last.length || 0),
+              blocksTotal: this[_stats].blocksTotal
+                + entry.blocks
+                - (last.blocks || 0)
+            })
 
             if (!lastFound) {
-              if (entry.type === 'file') {
-                this.update({
-                  filesTotal: this[_stats].filesTotal + 1
-                })
-              } else {
-                this.update({
-                  directoriesTotal: this[_stats].directoriesTotal + 1
-                })
-              }
+              this.update({ filesTotal: this[_stats].filesTotal + 1 })
             }
             db.batch()
               .put(entry.name, JSON.stringify(entry))
