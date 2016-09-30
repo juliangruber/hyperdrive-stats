@@ -29,7 +29,7 @@ module.exports = class Stats extends EventEmitter {
         feed: opts.archive.metadata,
         db: db
       }, (buf, cb) => {
-        const entry = encoding.decodeEntry(buf)
+        const entry = encoding.decode(buf)
         if (entry.type === 'file' || entry.type === 'directory') {
           db.get(entry.name, (err, last) => {
             if (err && !err.notFound) return cb(err)
