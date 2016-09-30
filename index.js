@@ -1,6 +1,6 @@
 'use strict'
 
-var EventEmitter = require('events')
+var EventEmitter = require('events').EventEmitter
 var index = require('hypercore-index')
 var encoding = require('hyperdrive-encoding')
 var inherits = require('util').inherits
