@@ -1,6 +1,6 @@
 {
   "name": "hyperdrive-stats",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "devDependencies": {
     "hyperdrive": "^7.6.0",
     "memdb": "^1.3.1",
