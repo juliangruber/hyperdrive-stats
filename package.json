@@ -9,7 +9,7 @@
     "tap": "^7.1.2"
   },
   "scripts": {
-    "test": "standard"
+    "test": "node example.js && standard"
   },
   "dependencies": {
     "hypercore-index": "^5.0.0",
