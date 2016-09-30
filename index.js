@@ -4,6 +4,7 @@ var EventEmitter = require('events')
 var index = require('hypercore-index')
 var encoding = require('hyperdrive-encoding')
 var inherits = require('util').inherits
+var objectAssign = require('object-assign')
 
 var _archive = Symbol()
 var _stats = Symbol()
@@ -23,7 +24,7 @@ function Stats (opts) {
     if (err && !err.notFound) return self.emit('error', err)
 
     self[_archive] = archive
-    self[_stats] = Object.assign({
+    self[_stats] = objectAssign({
       bytesTotal: 0,
       blocksProgress: 0,
       blocksTotal: 0,
@@ -91,5 +92,5 @@ Stats.prototype.update = function (data) {
 }
 
 Stats.prototype.get = function () {
-  return Object.assign({}, this[_stats])
+  return objectAssign({}, this[_stats])
 }

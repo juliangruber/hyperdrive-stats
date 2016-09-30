@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "hypercore-index": "^5.0.0",
-    "hyperdrive-encoding": "^2.0.0"
+    "hyperdrive-encoding": "^2.0.0",
+    "object-assign": "^4.1.0"
   }
 }
