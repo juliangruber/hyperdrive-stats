@@ -20,9 +20,25 @@ module.exports = class Stats extends EventEmitter {
       this[_archive] = archive
       this[_stats] = Object.assign({
         bytesTotal: 0,
+        blocksProgress: 0,
         blocksTotal: 0,
         filesTotal: 0
       }, JSON.parse(stats || '{}'))
+
+      archive.open(err => {
+        if (err) return this.emit('error', err)
+
+        if (!archive.owner) {
+          let blocksProgress = 0
+          for (let i = 0; i < archive.content.blocks; i++) {
+            if (archive.content.has(i)) blocksProgress++
+          }
+          this.update({ blocksProgress })
+          archive.content.on('download', () => {
+            this.update({ blocksProgress: this[_stats].blocksProgress + 1 })
+          })
+        }
+      })
 
       index({
         feed: opts.archive.metadata,
@@ -35,18 +51,18 @@ module.exports = class Stats extends EventEmitter {
             const lastFound = !!last
             last = JSON.parse(last || '{}')
 
-            this.update({
+            const update = {
               bytesTotal: this[_stats].bytesTotal +
                 entry.length -
                 (last.length || 0),
               blocksTotal: this[_stats].blocksTotal +
                 entry.blocks -
                 (last.blocks || 0)
-            })
-
-            if (!lastFound) {
-              this.update({ filesTotal: this[_stats].filesTotal + 1 })
             }
+            if (archive.owner) update.blocksProgress = update.blocksTotal
+            if (!lastFound) update.filesTotal = this[_stats].filesTotal + 1
+
+            this.update(update)
             db.batch()
               .put('!entry!' + entry.name, JSON.stringify(entry))
               .put('stats', JSON.stringify(this[_stats]))
