@@ -9,8 +9,13 @@ var drive = hyperdrive(db)
 
 var archive = drive.createArchive()
 
-var stats = new Stats({ archive, db })
-stats.on('update', function () { console.log(stats.get()) })
+var stats = new Stats({
+  archive: archive,
+  db: db
+})
+stats.on('update', function () {
+  console.log(stats.get())
+})
 
 var ws = archive.createFileWriteStream('file')
 ws.on('finish', function () {

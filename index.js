@@ -34,7 +34,7 @@ module.exports = class Stats extends EventEmitter {
           for (var i = 0; i < archive.content.blocks; i++) {
             if (archive.content.has(i)) blocksProgress++
           }
-          self.update({ blocksProgress })
+          self.update({ blocksProgress: blocksProgress })
           archive.content.on('download', function () {
             self.update({ blocksProgress: self[_stats].blocksProgress + 1 })
           })
@@ -80,7 +80,7 @@ module.exports = class Stats extends EventEmitter {
   update (data) {
     for (var key of Object.keys(data)) {
       this[_stats][key] = data[key]
-      this.emit(`update:${key}`)
+      this.emit('update:' + key)
     }
     this.emit('update')
   }
