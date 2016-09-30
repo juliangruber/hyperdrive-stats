@@ -30,7 +30,7 @@ module.exports = class Stats extends EventEmitter {
       }, (buf, cb) => {
         const entry = encoding.decode(buf)
         if (entry.type === 'file') {
-          db.get(entry.name, (err, last) => {
+          db.get('!entry!' + entry.name, (err, last) => {
             if (err && !err.notFound) return cb(err)
             const lastFound = !!last
             last = JSON.parse(last || '{}')
@@ -48,7 +48,7 @@ module.exports = class Stats extends EventEmitter {
               this.update({ filesTotal: this[_stats].filesTotal + 1 })
             }
             db.batch()
-              .put(entry.name, JSON.stringify(entry))
+              .put('!entry!' + entry.name, JSON.stringify(entry))
               .put('stats', JSON.stringify(this[_stats]))
               .write(cb)
           })
