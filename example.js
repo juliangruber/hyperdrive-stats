@@ -1,21 +1,21 @@
 'use strict'
 
-const Stats = require('.')
-const hyperdrive = require('hyperdrive')
-const memdb = require('memdb')
+var Stats = require('.')
+var hyperdrive = require('hyperdrive')
+var memdb = require('memdb')
 
-const db = memdb()
-const drive = hyperdrive(db)
+var db = memdb()
+var drive = hyperdrive(db)
 
-const archive = drive.createArchive()
+var archive = drive.createArchive()
 
-const stats = new Stats({ archive, db })
-stats.on('update', () => console.log(stats.get()))
+var stats = new Stats({ archive, db })
+stats.on('update', function () { console.log(stats.get()) })
 
-let ws = archive.createFileWriteStream('file')
-ws.on('finish', () => {
+var ws = archive.createFileWriteStream('file')
+ws.on('finish', function () {
   ws = archive.createFileWriteStream('file')
-  ws.on('finish', () => {
+  ws.on('finish', function () {
     archive.createFileWriteStream('file').end('beepboop')
   })
   ws.end('bar')
