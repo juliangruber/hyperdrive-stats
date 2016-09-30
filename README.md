@@ -3,6 +3,8 @@
 
 [WIP] Stats module for hyperdrive
 
+[![build status](https://travis-ci.org/juliangruber/hyperdrive-stats.svg?branch=master)](http://travis-ci.org/juliangruber/hyperdrive-stats)
+
 ## Usage
 
 ```js
