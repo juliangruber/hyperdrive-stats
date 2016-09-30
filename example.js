@@ -1,6 +1,6 @@
 'use strict'
 
-var Stats = require('.')
+var Stats = require('./')
 var hyperdrive = require('hyperdrive')
 var memdb = require('memdb')
 
