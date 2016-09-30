@@ -74,7 +74,7 @@ function Stats (opts) {
         cb()
       }
     }, function (err) {
-      self.emit('error', err)
+      if (err) self.emit('error', err)
     })
   })
 }
