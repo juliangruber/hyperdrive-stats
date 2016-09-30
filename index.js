@@ -84,7 +84,9 @@ function Stats (opts) {
 }
 
 Stats.prototype.update = function (data) {
-  for (var key of Object.keys(data)) {
+  var keys = Object.keys(data)
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i]
     this[_stats][key] = data[key]
     this.emit('update:' + key)
   }
