@@ -9,7 +9,7 @@ var drive = hyperdrive(db)
 
 var archive = drive.createArchive()
 
-var stats = new Stats({
+var stats = Stats({
   archive: archive,
   db: db
 })
