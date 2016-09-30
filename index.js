@@ -6,9 +6,6 @@ var encoding = require('hyperdrive-encoding')
 var inherits = require('util').inherits
 var objectAssign = require('object-assign')
 
-var _archive = Symbol()
-var _stats = Symbol()
-
 module.exports = Stats
 inherits(Stats, EventEmitter)
 
@@ -23,8 +20,7 @@ function Stats (opts) {
   db.get('stats', function (err, stats) {
     if (err && !err.notFound) return self.emit('error', err)
 
-    self[_archive] = archive
-    self[_stats] = objectAssign({
+    self._stats = objectAssign({
       bytesTotal: 0,
       blocksProgress: 0,
       blocksTotal: 0,
@@ -41,7 +37,7 @@ function Stats (opts) {
         }
         self.update({ blocksProgress: blocksProgress })
         archive.content.on('download', function () {
-          self.update({ blocksProgress: self[_stats].blocksProgress + 1 })
+          self.update({ blocksProgress: self._stats.blocksProgress + 1 })
         })
       }
     })
@@ -58,20 +54,20 @@ function Stats (opts) {
           last = JSON.parse(last || '{}')
 
           var update = {
-            bytesTotal: self[_stats].bytesTotal +
+            bytesTotal: self._stats.bytesTotal +
               entry.length -
               (last.length || 0),
-            blocksTotal: self[_stats].blocksTotal +
+            blocksTotal: self._stats.blocksTotal +
               entry.blocks -
               (last.blocks || 0)
           }
           if (archive.owner) update.blocksProgress = update.blocksTotal
-          if (!lastFound) update.filesTotal = self[_stats].filesTotal + 1
+          if (!lastFound) update.filesTotal = self._stats.filesTotal + 1
 
           self.update(update)
           db.batch()
             .put('!entry!' + entry.name, JSON.stringify(entry))
-            .put('stats', JSON.stringify(self[_stats]))
+            .put('stats', JSON.stringify(self._stats))
             .write(cb)
         })
       } else {
@@ -87,12 +83,12 @@ Stats.prototype.update = function (data) {
   var keys = Object.keys(data)
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i]
-    this[_stats][key] = data[key]
+    this._stats[key] = data[key]
     this.emit('update:' + key)
   }
   this.emit('update')
 }
 
 Stats.prototype.get = function () {
-  return objectAssign({}, this[_stats])
+  return objectAssign({}, this._stats)
 }
