@@ -5,6 +5,7 @@ var index = require('hypercore-index')
 var encoding = require('hyperdrive-encoding')
 var inherits = require('util').inherits
 var objectAssign = require('object-assign')
+var Speedometer = require('speedometer')
 
 module.exports = Stats
 inherits(Stats, EventEmitter)
@@ -16,19 +17,34 @@ function Stats (opts) {
   var archive = opts.archive
   var db = opts.db
   var self = this
+  this._stats = {
+    uploadSpeed: 0,
+    downloadSpeed: 0,
+    bytesTotal: 0,
+    blocksProgress: 0,
+    blocksTotal: 0,
+    filesTotal: 0
+  }
+  var uploadSpeed = Speedometer()
+  var downloadSpeed = Speedometer()
 
   db.get('stats', function (err, stats) {
     if (err && !err.notFound) return self.emit('error', err)
-
-    self._stats = objectAssign({
-      bytesTotal: 0,
-      blocksProgress: 0,
-      blocksTotal: 0,
-      filesTotal: 0
-    }, JSON.parse(stats || '{}'))
+    if (stats) {
+      objectAssign(self._stats, JSON.parse(stats))
+      self.update()
+    }
 
     archive.open(function (err) {
       if (err) return self.emit('error', err)
+
+      archive.content.on('upload', function (buf) {
+        self.update({ uploadSpeed: uploadSpeed(buf.length) })
+      })
+
+      archive.content.on('download', function (buf) {
+        self.update({ downloadSpeed: downloadSpeed(buf.length) })
+      })
 
       if (!archive.owner) {
         var blocksProgress = 0
@@ -80,7 +96,7 @@ function Stats (opts) {
 }
 
 Stats.prototype.update = function (data) {
-  var keys = Object.keys(data)
+  var keys = Object.keys(data || {})
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i]
     this._stats[key] = data[key]
