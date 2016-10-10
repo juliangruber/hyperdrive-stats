@@ -40,6 +40,7 @@ function Stats (opts) {
     }
 
     archive.open(function (err) {
+      if (err && /is closed/.test(err.message)) return
       if (err) return self.emit('error', err)
 
       archive.content.on('upload', function (buf) {
@@ -60,41 +61,41 @@ function Stats (opts) {
           self.update({ blocksProgress: self._stats.blocksProgress + 1 })
         })
       }
-    })
 
-    index({
-      feed: opts.archive.metadata,
-      db: db
-    }, function (buf, cb) {
-      var entry = encoding.decode(buf)
-      if (entry.type === 'file') {
-        db.get('!entry!' + entry.name, function (err, last) {
-          if (err && !err.notFound) return cb(err)
-          var lastFound = !!last
-          last = JSON.parse(last || '{}')
+      index({
+        feed: opts.archive.metadata,
+        db: db
+      }, function (buf, cb) {
+        var entry = encoding.decode(buf)
+        if (entry.type === 'file') {
+          db.get('!entry!' + entry.name, function (err, last) {
+            if (err && !err.notFound) return cb(err)
+            var lastFound = !!last
+            last = JSON.parse(last || '{}')
 
-          var update = {
-            bytesTotal: self._stats.bytesTotal +
-              entry.length -
-              (last.length || 0),
-            blocksTotal: self._stats.blocksTotal +
-              entry.blocks -
-              (last.blocks || 0)
-          }
-          if (archive.owner) update.blocksProgress = update.blocksTotal
-          if (!lastFound) update.filesTotal = self._stats.filesTotal + 1
+            var update = {
+              bytesTotal: self._stats.bytesTotal +
+                entry.length -
+                (last.length || 0),
+              blocksTotal: self._stats.blocksTotal +
+                entry.blocks -
+                (last.blocks || 0)
+            }
+            if (archive.owner) update.blocksProgress = update.blocksTotal
+            if (!lastFound) update.filesTotal = self._stats.filesTotal + 1
 
-          self.update(update)
-          db.batch()
-            .put('!entry!' + entry.name, JSON.stringify(entry))
-            .put('stats', JSON.stringify(self._stats))
-            .write(cb)
-        })
-      } else {
-        cb()
-      }
-    }, function (err) {
-      if (err) self.emit('error', err)
+            self.update(update)
+            db.batch()
+              .put('!entry!' + entry.name, JSON.stringify(entry))
+              .put('stats', JSON.stringify(self._stats))
+              .write(cb)
+          })
+        } else {
+          cb()
+        }
+      }, function (err) {
+        if (err) self.emit('error', err)
+      })
     })
   })
 }
