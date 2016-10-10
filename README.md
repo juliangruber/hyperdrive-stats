@@ -13,3 +13,17 @@ const stats = Stats({ archive, db })
 
 stats.on('update', () => console.log(stats.get()))
 ```
+
+## Stats
+
+- `"uploadSpeed"`
+- `"downloadSpeed"`
+- `"bytesTotal"`
+- `"bytesProgress"`
+- `"blocksTotal"`
+- `"filesTotal"`
+
+
+## License
+
+MIT
