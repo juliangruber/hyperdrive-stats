@@ -6,6 +6,7 @@ var encoding = require('hyperdrive-encoding')
 var inherits = require('util').inherits
 var objectAssign = require('object-assign')
 var Speedometer = require('speedometer')
+var assert = require('assert')
 
 module.exports = Stats
 inherits(Stats, EventEmitter)
@@ -13,6 +14,9 @@ inherits(Stats, EventEmitter)
 function Stats (opts) {
   if (!(this instanceof Stats)) return new Stats(opts)
   EventEmitter.call(this)
+
+  assert(opts.archive, '.archive required')
+  assert(opts.db, '.db required')
 
   var archive = opts.archive
   var db = opts.db
