@@ -43,11 +43,11 @@ function Stats (opts) {
       if (err && /is closed/.test(err.message)) return
       if (err) return self.emit('error', err)
 
-      archive.content.on('upload', function (buf) {
+      archive.on('upload', function (buf) {
         self.update({ uploadSpeed: uploadSpeed(buf.length) })
       })
 
-      archive.content.on('download', function (buf) {
+      archive.on('download', function (buf) {
         self.update({ downloadSpeed: downloadSpeed(buf.length) })
       })
 
