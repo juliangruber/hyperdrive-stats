@@ -8,10 +8,15 @@ Live & persistent stats module for hyperdrive.
 ## Usage
 
 ```js
-const Stats = require('hyperdrive-stats')
-const stats = Stats({ archive, db })
+var Stats = require('hyperdrive-stats')
+var stats = Stats({
+  archive: archive,
+  db: d
+})
 
-stats.on('update', () => console.log(stats.get()))
+stats.on('update', function () {
+  console.log(stats.get())
+})
 ```
 
 ## Stats
