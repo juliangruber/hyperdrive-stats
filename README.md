@@ -11,7 +11,7 @@ Live & persistent stats module for hyperdrive.
 var Stats = require('hyperdrive-stats')
 var stats = Stats({
   archive: archive,
-  db: d
+  db: db
 })
 
 stats.on('update', function () {
