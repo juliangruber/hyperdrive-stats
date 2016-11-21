@@ -1,6 +1,6 @@
 {
   "name": "hyperdrive-stats",
-  "version": "2.2.6",
+  "version": "2.2.7",
   "repository": "juliangruber/hyperdrive-stats",
   "devDependencies": {
     "hyperdrive": "^7.6.0",
