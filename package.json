@@ -1,6 +1,7 @@
 {
   "name": "hyperdrive-stats",
   "version": "2.2.6",
+  "license": "MIT",
   "devDependencies": {
     "hyperdrive": "^7.6.0",
     "memdb": "^1.3.1",
