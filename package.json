@@ -1,6 +1,6 @@
 {
   "name": "hyperdrive-stats",
-  "version": "2.2.7",
+  "version": "2.2.8",
   "repository": "juliangruber/hyperdrive-stats",
   "license": "MIT",
   "devDependencies": {
