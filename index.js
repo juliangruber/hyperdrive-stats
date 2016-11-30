@@ -5,7 +5,6 @@ var index = require('hypercore-index')
 var encoding = require('hyperdrive-encoding')
 var inherits = require('util').inherits
 var objectAssign = require('object-assign')
-var Speedometer = require('speedometer')
 var assert = require('assert')
 
 module.exports = Stats
@@ -22,15 +21,11 @@ function Stats (opts) {
   var db = opts.db
   var self = this
   this._stats = {
-    uploadSpeed: 0,
-    downloadSpeed: 0,
     bytesTotal: 0,
     blocksProgress: 0,
     blocksTotal: 0,
     filesTotal: 0
   }
-  var uploadSpeed = Speedometer()
-  var downloadSpeed = Speedometer()
 
   db.get('stats', function (err, stats) {
     if (err && !err.notFound) return self.emit('error', err)
@@ -42,14 +37,6 @@ function Stats (opts) {
     archive.open(function (err) {
       if (err && /is closed/.test(err.message)) return
       if (err) return self.emit('error', err)
-
-      archive.on('upload', function (buf) {
-        self.update({ uploadSpeed: uploadSpeed(buf.length) })
-      })
-
-      archive.on('download', function (buf) {
-        self.update({ downloadSpeed: downloadSpeed(buf.length) })
-      })
 
       if (!archive.owner) {
         var blocksProgress = 0

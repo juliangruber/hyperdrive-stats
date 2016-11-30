@@ -21,8 +21,6 @@ stats.on('update', function () {
 
 ## Stats
 
-- `"uploadSpeed"`
-- `"downloadSpeed"`
 - `"bytesTotal"`
 - `"bytesProgress"`
 - `"blocksTotal"`
