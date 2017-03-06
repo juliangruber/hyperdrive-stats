@@ -26,7 +26,9 @@ ws.on('finish', function () {
   ws.end('bar')
 })
 ws.end('foo')
-archive.createFileWriteStream({
-  name: 'directory',
-  type: 'directory'
-}).end()
+archive
+  .createFileWriteStream({
+    name: 'directory',
+    type: 'directory'
+  })
+  .end()
