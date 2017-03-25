@@ -1,6 +1,8 @@
 
 # hyperdrive-stats
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/juliangruber/hyperdrive-stats.svg)](https://greenkeeper.io/)
+
 Live & persistent stats module for hyperdrive.
 
 [![build status](https://travis-ci.org/juliangruber/hyperdrive-stats.svg?branch=master)](http://travis-ci.org/juliangruber/hyperdrive-stats)
