@@ -8,13 +8,13 @@
     "memdb": "^1.3.1",
     "prettier-standard-formatter": "^0.222222222222222.333333333333333",
     "random-access-file": "^1.3.1",
-    "tap": "^7.1.2"
+    "tap": "^10.3.0"
   },
   "scripts": {
     "test": "prettier-standard-formatter *.js && node example.js"
   },
   "dependencies": {
-    "hypercore-index": "^5.0.0",
+    "hypercore-index": "^6.0.0",
     "hyperdrive-encoding": "^2.0.0",
     "object-assign": "^4.1.0"
   }
